@@ -1,6 +1,7 @@
 import { AsyncHandller } from "../config/AsyncHandler.js";
 import { User } from "../models/user.model.js";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { ApiResponse } from "../config/ApiResp.js";
 import { ApiError } from "../config/apiError.js";
 const regesterUser = AsyncHandller(async (req, res) => {
@@ -29,6 +30,11 @@ const regesterUser = AsyncHandller(async (req, res) => {
 
   return res
     .status(201)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false, // true if using HTTPS
+      sameSite: "lax",
+    })
     .json(
       new ApiResponse(
         201,
@@ -83,12 +89,66 @@ const loginUser = AsyncHandller(async (req, res) => {
   if (!matchPassword) {
     throw new ApiError(420, "galat password daltat hai maderchod");
   }
+  const accessToken = user.generateAccessToken();
   const refreshToken = user.generateRefreshToken();
   user.RefreshTOken = refreshToken;
+
   await user.save();
 
   return res
     .status(201)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false, // true if using HTTPS
+      sameSite: "lax",
+    })
     .json(new ApiResponse(201, user, "User login successfully"));
 });
-export { regesterUser, verfiyUser, loginUser };
+const logout = AsyncHandller(async (req, res) => {});
+const resendVerificationEmailToken = AsyncHandller(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, "User not found");
+  console.log("Decoded JWT user:", req.user);
+
+  const { hasedtoken, unhashedtoken, tokenExpiry } =
+    user.generateEmailVerificationToken();
+  user.EmailVerificationToken = hasedtoken;
+  user.EmailVerificationTokenExpry = tokenExpiry;
+  await user.save();
+  console.log("Send this token to user:", unhashedtoken);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Verification email sent again"));
+});
+const refreshAccessTokenRefresh = AsyncHandller(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, "User not found");
+  console.log("Decoded JWT user:", req.user);
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+  user.RefreshTOken = refreshToken;
+  await user.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, refreshToken, "refresh access token realise "));
+});
+const forgotPassword = AsyncHandller(async (req, res) => {});
+const changeCurrentPassword = AsyncHandller(async (req, res) => {});
+const getcurrentUser = AsyncHandller(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, "User not found");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Verification email sent again"));
+});
+// logout
+//forgot password request
+//change current password
+export {
+  regesterUser,
+  verfiyUser,
+  loginUser,
+  resendVerificationEmailToken,
+  refreshAccessTokenRefresh,
+  getcurrentUser,
+};

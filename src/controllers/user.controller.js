@@ -141,6 +141,13 @@ const getcurrentUser = AsyncHandller(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "Verification email sent again"));
 });
+const forgetPassword = AsyncHandller(async (req, res) => {
+    const {newpassword }= req.body 
+    
+});
+const ChangePassword = AsyncHandller(async (req, res) => {
+
+});
 // logout
 //forgot password request
 //change current password

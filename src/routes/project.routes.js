@@ -1,15 +1,12 @@
 import { Router } from "express";
-const router = Router()
-
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  createProjects,
+  getProjectbyId,
+  getProjects,
+} from "../controllers/project.controller.js";
+const router = Router();
+router.route("/").get(verifyJWT, getProjects);
+router.route("/createProject").post(verifyJWT, createProjects);
+router.route("/:projectId").get(verifyJWT , getProjectbyId)
 export default router;
-
-
-
-
-
-
-
-
-
-
-

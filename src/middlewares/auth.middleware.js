@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import {User} from "../models/user.model.js";
 import { ApiError } from "../config/apiError.js";
-import { asynchandler } from "../config/AsyncHandler.js";
+import { AsyncHandller } from "../config/AsyncHandler.js";
 import { ProjectMember } from "../models/projectmember.model.js";
-import mongoose, { mongoose } from "mongoose";
-export const verifyJWT = asynchandler(async (req, res, next) => {
+import mongoose from "mongoose";
+export const verifyJWT = AsyncHandller(async (req, res, next) => {
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace("Bearer ", "");
@@ -17,7 +17,7 @@ export const verifyJWT = asynchandler(async (req, res, next) => {
     if (!decoded) {
       throw new ApiError(400, "Access token is corrupted or malformed");
     }
-    const user = await User.findbyId(decoded?._id);
+    const user = await User.findById(decoded?._id);
     if (!user) {
       throw new ApiError(401, "invalid user so access token is invalid ");
     }

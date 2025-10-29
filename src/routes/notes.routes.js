@@ -6,8 +6,8 @@ import {
   updateNotes,
   deleteNotes,
 } from "../controllers/note.controller.js";
-import UserRolesEnum, { AvalableUserRoles } from "../config/constants.js";
-import validateProjectPremission from "../middlewares/auth.middleware.js";
+import { UserRolesEnum, AvalableUserRoles } from "../config/constants.js";
+import {validateProjectPremission} from "../middlewares/auth.middleware.js";
 import { User } from "../models/user.model.js";
 const router = Router();
 router

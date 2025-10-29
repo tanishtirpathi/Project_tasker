@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import {User} from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../config/apiError.js";
 import { AsyncHandller } from "../config/AsyncHandler.js";
 import { ProjectMember } from "../models/projectmember.model.js";
@@ -33,15 +33,15 @@ export const verifyJWT = AsyncHandller(async (req, res, next) => {
 });
 
 export const validateProjectPremission = (roles = []) =>
-  asynchandler(async (req, res, next) => {
+  AsyncHandller(async (req, res, next) => {
     const { projectId } = req.params;
     if (!projectId) {
       throw new ApiError(401, "invalid project id ");
     }
 
     const project = await ProjectMember.findOne({
-      project: mongoose.Types.ObjectId(projectId),
-      user: mongoose.Types.ObjectId(req.user),
+      project: projectId,
+      user: req.user?._id,
     });
     if (!project) {
       throw new ApiError(401, "no project found ");

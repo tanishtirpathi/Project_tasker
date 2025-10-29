@@ -1,4 +1,4 @@
-import { ApiResponse } from "../config/ApiResp";
+import { ApiResponse } from "../config/ApiResp.js";
 // boiler plates
 import { AsyncHandller } from "../config/AsyncHandler.js";
 import { ProjectNote } from "../models/note.model.js";

@@ -2,8 +2,9 @@ import { AsyncHandller } from "../config/AsyncHandler.js";
 import { ApiError } from "../config/apiError.js";
 import { ApiResponse } from "../config/ApiResp.js";
 import { Project } from "../models/project.model.js";
+import { UserRolesEnum } from "../config/constants.js";
 import mongoose from "mongoose";
-
+import { ProjectMember } from "../models/projectmember.model.js";
 const getProjects = AsyncHandller(async (req, res) => {
   const userId = req.user?._id;
   if (!userId) {
@@ -57,11 +58,45 @@ const createProjects = AsyncHandller(async (req, res) => {
       "project creating error ab ja ke ma chuda chutiya bkl"
     );
   }
+  // Step 4: Add project creator as ADMIN in ProjectMember
+  const projectOwner = await ProjectMember.create({
+    user: req.user._id,
+    project: createProject._id,
+    role: UserRolesEnum.ADMIN, // <-- Make creator admin
+  });
+
+  if (!projectOwner) {
+    throw new ApiError(500, "Failed to assign creator as project admin");
+  }
+
   return res
     .status(200)
-    .json(new ApiResponse(200, createProject, "project created successfully "));
+    .json(
+      new ApiResponse(
+        200,
+        { project: createProject, member: projectOwner },
+        "project created successfully "
+      )
+    );
 });
-const updateProject = AsyncHandller(async (req, res) => {});
+const updateProject = AsyncHandller(async (req, res) => {
+  const { projectId } = req.params;
+  const { Name, description } = req.body;
+  const project = await Project.findById(projectId);
+  if (!project) throw new ApiError(404, "Project not found");
+  const updatedProject = await Project.findByIdAndUpdate(
+    projectId,
+    { Name, description },
+    { new: true }
+  );
+  if (!updatedProject) {
+    throw new ApiError(404, "project update nai hua ab ghanta ukadh le ");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedProject, "Project updated successfully"));
+});
 const getProjectMembers = AsyncHandller(async (req, res) => {});
 const addProjectMember = AsyncHandller(async (req, res) => {});
 const updateMemberRole = AsyncHandller(async (req, res) => {});

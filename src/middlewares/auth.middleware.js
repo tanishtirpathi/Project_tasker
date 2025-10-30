@@ -38,17 +38,22 @@ export const validateProjectPremission = (roles = []) =>
     if (!projectId) {
       throw new ApiError(401, "invalid project id ");
     }
-
     const project = await ProjectMember.findOne({
       project: projectId,
       user: req.user?._id,
+    });
+    console.log(project);
+    console.log({
+      from: "validateProjectPremission",
+      userId: req.user?._id,
+      projectId: req.params.projectId,
     });
     if (!project) {
       throw new ApiError(401, "no project found ");
     }
     const givenRole = project?.role;
-    req.user.role = givenRole;
     if (!roles.includes(givenRole)) {
       throw new ApiError(403, "you don't have permission ");
     }
+    next();
   });

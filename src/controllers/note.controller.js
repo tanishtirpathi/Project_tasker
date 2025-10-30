@@ -1,5 +1,4 @@
 import { ApiResponse } from "../config/ApiResp.js";
-// boiler plates
 import { AsyncHandller } from "../config/AsyncHandler.js";
 import { ProjectNote } from "../models/note.model.js";
 import { ApiError } from "../config/apiError.js";
@@ -11,11 +10,11 @@ const getNotes = AsyncHandller(async (req, res) => {
   if (!project) {
     throw new ApiError(400, "project not found ");
   }
-  const notes = await ProjectNote.findOne({
-    Project: new mongoose.Types.ObjectId(projectId),
-  }).populate("CreatedBy", "username fullname avatar");
+  const notes = await ProjectNote.find({
+    project: new mongoose.Types.ObjectId(projectId),
+  }).populate("createdBy", "username fullname avatar");
 
-  return res.status(200).json(new ApiResponse(200, notes, "notes are found  "));
+  return res.status(200).json(new ApiResponse(200, notes, "notes are found "));
 });
 const getNotesId = AsyncHandller(async (req, res) => {
   const { noteId } = req.params;
@@ -30,7 +29,7 @@ const getNotesId = AsyncHandller(async (req, res) => {
 });
 const deleteNotes = AsyncHandller(async (req, res) => {
   const { noteId } = req.params;
-  const note = ProjectNote.findByIdAndDelete(noteId);
+  const note = await ProjectNote.findByIdAndDelete(noteId);
   if (!note) {
     throw new ApiError(400, "note delete nai hua ");
   }
@@ -64,12 +63,15 @@ const createNotes = AsyncHandller(async (req, res) => {
   if (!project) {
     throw new ApiError(400, "project note found bro ");
   }
-  const note = ProjectNote.create({
+  const note = await ProjectNote.create({
     project: new mongoose.Types.ObjectId(projectId),
     content,
     createdBy: new mongoose.Types.ObjectId(req.user._id),
   });
-  const PopulatedNotes = await ProjectNote.findById(note._).populate(
+  if (!note) {
+    throw new ApiError(400, "error in creating notes");
+  }
+  const PopulatedNotes = await ProjectNote.findById(note._id).populate(
     "createdBy",
     "username fullname avatar"
   );

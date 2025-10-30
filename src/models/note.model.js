@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const projectNoteschema = new Schema(
   {
     project: { type: Schema.Types.ObjectId, ref: "Project", required: true },
-    CreatedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     content: {
       type: String,
       required: true,
